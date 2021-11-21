@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.9">
+  <POU Name="MAIN" Id="{e7b4249b-701a-41a5-9112-3c8ba79bc23a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	readImage: FB_VN_ReadImage;
+	myImage : ITcVnImage;
+	myTranslatedImage : ITcVnImage;
+	transformationMatrix : TcVnMatrix2x3_LREAL;
+	myOriginalImage   : ITcVnDisplayableImage;
+	myDisplayableImage   : ITcVnDisplayableImage;
+	hr : HRESULT;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[readImage(
+    sFilePath   :=  'C:\temp\image.png', 
+    ipDestImage :=  myImage,
+    bRead       :=  TRUE,
+    nTimeout    :=  T#500MS
+);
+
+IF readImage.bBusy OR readImage.bError OR myImage = 0 THEN
+    RETURN;
+END_IF
+
+hr := F_VN_GenerateAffineTransformationUnitMatrix2D(transformationMatrix, hr);
+hr := F_VN_ApplyTranslationToAffineTransformation(transformationMatrix, 20.0,20.0,hr);
+hr := F_VN_WarpAffine(myImage,myTranslatedImage,transformationMatrix,hr);
+
+hr := F_VN_TransformIntoDisplayableImage(myImage, myOriginalImage, S_OK);
+hr := F_VN_TransformIntoDisplayableImage(myTranslatedImage, myDisplayableImage, S_OK);]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="189" Count="8" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="203" Count="2" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="25" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
